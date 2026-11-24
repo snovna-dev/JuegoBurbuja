@@ -1,45 +1,134 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>	Burbujas </title>
-	<link rel="stylesheet" type="text/css" href="index.css">
-	<!-- CSS only boostrap-->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-</head>
-<body onkeydown="control(event);">
-	<div id="contenedor" class="container-fluid">
-		<div id="cuerpo" class="row justify-content-md-center">
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#06132b" />
+    <meta name="description" content="Juego de la Burbuja: atrapa los cuadros negros y esquiva los rojos." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Burbuja</title>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <!-- ============================== HUD ============================== -->
+      <header class="hud" id="hud" hidden>
+        <div class="hud__side">
+          <div class="player-chip" title="Jugador">
+            <span class="player-chip__avatar" aria-hidden="true"></span>
+            <span class="player-chip__name" id="hud-name">Jugador</span>
+          </div>
+          <div class="lives" id="hud-lives" role="img" aria-label="Vidas"></div>
+        </div>
 
-		</div>
-	</div>
-	<!------------------------------------------------------------------------ PLATILLAS------------------------------------------->
-	<template id="inicio" >
-		<div class="col">
-			<form id="datos" >
-				<div class="form-group">
-				  <label for="exampleInputEmail1">Nombre</label>
-				  <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese nombre">
-				</div>
-				<button  class="btn btn-primary" id="ingresar" onclick ="iniciarJuego(`juego`)">ingresar</button>
-			</form>	
-		</div>
-	</template>
+        <div class="hud__side hud__side--end">
+          <div class="stat">
+            <span class="stat__label">Nivel</span>
+            <span class="stat__value" id="hud-level">1</span>
+          </div>
+          <div class="stat stat--score">
+            <span class="stat__icon" aria-hidden="true"></span>
+            <span class="stat__label">Cuadros</span>
+            <span class="stat__value" id="hud-score" aria-live="polite">0</span>
+          </div>
+          <button class="icon-btn" id="btn-sound" type="button" aria-label="Silenciar sonido">
+            <svg class="icon icon--on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zm-2.5-8.8v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+            <svg class="icon icon--off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.6 3 2.7-2.7-1.4-1.4-2.7 2.7-2.7-2.7-1.4 1.4 2.7 2.7-2.7 2.7 1.4 1.4 2.7-2.7 2.7 2.7 1.4-1.4z"/></svg>
+          </button>
+          <button class="icon-btn" id="btn-pause" type="button" aria-label="Pausar">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          </button>
+        </div>
+      </header>
 
-	<template id="juego"  class="col">
+      <!-- ============================ TABLERO ============================ -->
+      <main class="board" id="board">
+        <canvas id="canvas" aria-label="Tablero de juego">Tu navegador no soporta canvas.</canvas>
 
-		<div class="col-10"> <canvas id="canvas" width= "900px" height= "600px" > canvas  no soportado	</canvas> </div>
-		<div id="puntaje" class="col-2"></div>
+        <div class="banner" id="banner" aria-live="assertive">
+          <strong class="banner__title" id="banner-title"></strong>
+          <span class="banner__sub" id="banner-sub"></span>
+        </div>
+        <p class="hint" id="hint" hidden></p>
 
-	</template>
-	<!------------------------------------------------------------------------ ------------------------------------------->
-	
-	<!-- JavaScript Bundle with Popper -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-	<script src="vista.js"></script>
-	<script src="modelo.js"></script>
-	<script src="controlador.js"></script>
-</body>
+        <!-- Pantalla de inicio -->
+        <section class="screen" id="screen-start" aria-labelledby="title">
+          <div class="card card--start">
+            <div class="card__col">
+              <div class="logo">
+                <span class="logo__bubble" aria-hidden="true"></span>
+                <h1 class="logo__title" id="title">Burbuja</h1>
+              </div>
+              <p class="tagline">Atrapa los cuadros negros, esquiva los rojos y no dejes que te revienten.</p>
 
-	
+              <form class="form" id="form-start" novalidate>
+                <label class="form__label" for="player-name">¿Cómo te llamas?</label>
+                <div class="form__row">
+                  <input class="input" id="player-name" name="name" type="text" autocomplete="nickname" maxlength="16" placeholder="Tu nombre" required enterkeyhint="go" />
+                  <button class="btn btn--primary" type="submit">Jugar</button>
+                </div>
+                <p class="form__error" id="name-error" role="alert"></p>
+              </form>
+
+              <ul class="legend">
+                <li><span class="legend__icon legend__icon--bubble"></span><span><b>Tú</b> — una burbuja que nunca se detiene</span></li>
+                <li><span class="legend__icon legend__icon--gem"></span><span><b>Cuadro negro</b> — +1 punto y creces</span></li>
+                <li><span class="legend__icon legend__icon--enemy"></span><span><b>Cuadro rojo</b> — te quita una vida</span></li>
+              </ul>
+              <p class="controls-help" id="controls-help"></p>
+            </div>
+
+            <div class="card__col card__col--board">
+              <h2 class="section-title">Mejores puntajes</h2>
+              <ol class="leaderboard" id="leaderboard-start"></ol>
+              <p class="storage-note" id="storage-note"></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pausa -->
+        <section class="screen" id="screen-pause" hidden aria-labelledby="pause-title">
+          <div class="card card--small">
+            <h2 class="card__title" id="pause-title">Pausa</h2>
+            <div class="actions">
+              <button class="btn btn--primary" type="button" id="btn-resume">Continuar</button>
+              <button class="btn btn--ghost" type="button" id="btn-quit">Salir al menú</button>
+            </div>
+            <p class="muted">Presiona <kbd>P</kbd> o <kbd>Esc</kbd> para continuar</p>
+          </div>
+        </section>
+
+        <!-- Fin del juego -->
+        <section class="screen" id="screen-over" hidden aria-labelledby="over-title">
+          <div class="card card--over">
+            <h2 class="card__title" id="over-title">¡Pum! Se reventó tu burbuja</h2>
+            <p class="record" id="over-record" hidden>¡Nuevo récord personal!</p>
+            <div class="summary">
+              <div class="summary__item"><span class="summary__value" id="over-score">0</span><span class="summary__label">Cuadros</span></div>
+              <div class="summary__item"><span class="summary__value" id="over-level">1</span><span class="summary__label">Nivel</span></div>
+              <div class="summary__item"><span class="summary__value" id="over-time">0:00</span><span class="summary__label">Tiempo</span></div>
+              <div class="summary__item"><span class="summary__value" id="over-rank">—</span><span class="summary__label">Puesto</span></div>
+            </div>
+            <ol class="leaderboard leaderboard--compact" id="leaderboard-over"></ol>
+            <div class="actions">
+              <button class="btn btn--primary" type="button" id="btn-again">Jugar de nuevo</button>
+              <button class="btn btn--ghost" type="button" id="btn-change">Cambiar jugador</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- ===================== Pad direccional (táctil) ===================== -->
+      <nav class="dpad" id="dpad" aria-label="Controles de dirección" hidden>
+        <button class="dpad__btn dpad__btn--up" data-dir="up" type="button" aria-label="Arriba"><svg viewBox="0 0 24 24"><path d="M12 6l7 9H5z"/></svg></button>
+        <button class="dpad__btn dpad__btn--left" data-dir="left" type="button" aria-label="Izquierda"><svg viewBox="0 0 24 24"><path d="M6 12l9-7v14z"/></svg></button>
+        <button class="dpad__btn dpad__btn--right" data-dir="right" type="button" aria-label="Derecha"><svg viewBox="0 0 24 24"><path d="M18 12l-9 7V5z"/></svg></button>
+        <button class="dpad__btn dpad__btn--down" data-dir="down" type="button" aria-label="Abajo"><svg viewBox="0 0 24 24"><path d="M12 18l-7-9h14z"/></svg></button>
+      </nav>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>

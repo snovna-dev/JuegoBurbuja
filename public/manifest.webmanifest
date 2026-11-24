@@ -1,0 +1,14 @@
+{
+  "name": "Juego de la Burbuja",
+  "short_name": "Burbuja",
+  "description": "Atrapa los cuadros negros y esquiva los rojos.",
+  "start_url": ".",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#06132b",
+  "theme_color": "#06132b",
+  "lang": "es",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
